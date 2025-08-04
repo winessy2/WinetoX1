@@ -1,0 +1,314 @@
+-- Загрузка Rayfield
+local Rayfield = loadstring(gameHttpGet(httpssirius.menurayfield))()
+
+-- Окно GUI
+local Window = RayfieldCreateWindow({
+   Name = WinetoX Hub,
+   LoadingTitle = WinetoX Loader,
+   LoadingSubtitle = Ultimate GUI by WinetoX,
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = WinetoXData,
+      FileName = WinetoX_Config
+   },
+   KeySystem = true,
+   KeySettings = {
+      Title = WinetoX  Key System,
+      Subtitle = Введите ключ,
+      Note = ,
+      FileName = WinetoXKey,
+      SaveKey = true,
+      GrabKeyFromSite = false,
+      Key = {Winessy}
+   }
+})
+
+-- Главная вкладка
+local mainTab = WindowCreateTab(⚙️ Хак-функции, nil)
+
+-- Игрок и переменные
+local player = game.Players.LocalPlayer
+local UIS = gameGetService(UserInputService)
+local RunService = gameGetService(RunService)
+local character = player.Character or player.CharacterAddedWait()
+local humanoid = characterWaitForChild(Humanoid)
+local speed = 16
+local noclip = false
+local infJumpEnabled = false
+local LockMonitorEnabled = false
+
+-- Функция поиска базы
+local function FindPlayerBase()
+	local basesFolder = workspaceFindFirstChild(Bases)
+	local playerName = player.Name
+
+	if not basesFolder then return nil end
+
+	for _, base in ipairs(basesFolderGetChildren()) do
+		local config = baseFindFirstChild(Configuration)
+		if config then
+			local playerValue = configFindFirstChild(Player)
+			if playerValue and tostring(playerValue.Value) == playerName then
+				return base
+			end
+		end
+	end
+
+	return nil
+end
+
+-- === Speed Bypass ===
+player.CharacterAddedConnect(function(char)
+	character = char
+	humanoid = charWaitForChild(Humanoid)
+	humanoid.WalkSpeed = speed
+	humanoidGetPropertyChangedSignal(WalkSpeed)Connect(function()
+		if humanoid.WalkSpeed ~= speed then
+			humanoid.WalkSpeed = speed
+		end
+	end)
+end)
+
+mainTabCreateButton({
+	Name = 🏃‍♂️ Установить скорость 72,
+	Callback = function()
+		speed = 72
+		humanoid.WalkSpeed = speed
+		humanoidGetPropertyChangedSignal(WalkSpeed)Connect(function()
+			if humanoid.WalkSpeed ~= speed then
+				humanoid.WalkSpeed = speed
+			end
+		end)
+		RayfieldNotify({
+			Title = Скорость установлена,
+			Content = Ты двигаешься со скоростью 72!,
+			Duration = 4
+		})
+	end
+})
+
+-- === Noclip ===
+RunService.SteppedConnect(function()
+	if noclip and character then
+		for _, part in pairs(characterGetDescendants()) do
+			if partIsA(BasePart) and part.CanCollide then
+				part.CanCollide = false
+			end
+		end
+	end
+end)
+
+mainTabCreateToggle({
+	Name = 🚧 Включить Noclip,
+	CurrentValue = false,
+	Flag = NoclipToggle,
+	Callback = function(Value)
+		noclip = Value
+	end
+})
+
+-- === Телепорт к базе ===
+local playerBase = FindPlayerBase()
+if playerBase then
+	mainTabCreateButton({
+		Name = 🚀 Телепорт к моей базе,
+		Callback = function()
+			local root = player.Character and player.CharacterFindFirstChild(HumanoidRootPart)
+			local collectZone = playerBaseFindFirstChild(CollectZone, true)
+			if root and collectZone then
+				root.CFrame = collectZone.CFrame + Vector3.new(0, 5, 0)
+				RayfieldNotify({
+					Title = Телепорт выполнен,
+					Content = Ты у своей базы!,
+					Duration = 4
+				})
+			end
+		end
+	})
+end
+
+-- === ESP ===
+mainTabCreateToggle({
+	Name = 🧠 Включить ESP игроков,
+	CurrentValue = false,
+	Flag = ESPToggle,
+	Callback = function(enabled)
+		for _, p in pairs(game.PlayersGetPlayers()) do
+			if p ~= player and p.Character then
+				local head = p.CharacterFindFirstChild(Head)
+				if head and not headFindFirstChild(NameTag) then
+					local tag = Instance.new(BillboardGui, head)
+					tag.Name = NameTag
+					tag.Size = UDim2.new(0, 200, 0, 50)
+					tag.StudsOffset = Vector3.new(0, 2, 0)
+					tag.AlwaysOnTop = true
+
+					local label = Instance.new(TextLabel, tag)
+					label.Size = UDim2.new(1, 0, 1, 0)
+					label.BackgroundTransparency = 1
+					label.TextColor3 = Color3.new(1, 1, 1)
+					label.TextStrokeTransparency = 0
+					label.Text = p.Name
+					label.Font = Enum.Font.SourceSansBold
+					label.TextScaled = true
+				end
+			end
+		end
+
+		if not enabled then
+			for _, p in pairs(game.PlayersGetPlayers()) do
+				if p ~= player and p.Character and p.CharacterFindFirstChild(Head) then
+					local tag = p.Character.HeadFindFirstChild(NameTag)
+					if tag then tagDestroy() end
+				end
+			end
+		end
+	end
+})
+
+-- === Fly Bypass ===
+mainTabCreateButton({
+	Name = 🕊 Включить Fly Bypass (XNEOFF),
+	Callback = function()
+		loadstring(gameHttpGet(httpsraw.githubusercontent.comXNEOFFFlyGuiV3mainFlyGuiV3.txt))()
+	end
+})
+
+-- === Infinite Jump ===
+UIS.JumpRequestConnect(function()
+	if infJumpEnabled then
+		local h = player.Character and player.CharacterFindFirstChildOfClass(Humanoid)
+		if h then
+			hChangeState(Enum.HumanoidStateType.Jumping)
+		end
+	end
+end)
+
+mainTabCreateToggle({
+	Name = 🔁 Включить Infinite Jump,
+	CurrentValue = false,
+	Flag = InfJumpToggle,
+	Callback = function(state)
+		infJumpEnabled = state
+	end
+})
+
+-- === Prompt Bypass ===
+mainTabCreateButton({
+	Name = ⚡ Убрать задержку у всех ProximityPrompt,
+	Callback = function()
+		local function bypassPrompt(prompt)
+			if promptIsA(ProximityPrompt) then
+				prompt.HoldDuration = 0
+				prompt.RequiresLineOfSight = false
+			end
+		end
+
+		for _, obj in ipairs(workspaceGetDescendants()) do
+			bypassPrompt(obj)
+		end
+
+		workspace.DescendantAddedConnect(function(obj)
+			bypassPrompt(obj)
+		end)
+
+		RayfieldNotify({
+			Title = Готово!,
+			Content = Все ProximityPrompt теперь моментальные.,
+			Duration = 4
+		})
+	end
+})
+
+-- === 🔒 Lock Monitor (по Timer = 0s) ===
+local lockBaseEnabled = false
+
+mainTabCreateToggle({
+	Name = 🔒 Авто Lock Base (по таймеру),
+	CurrentValue = false,
+	Flag = LockBaseToggle,
+	Callback = function(state)
+		lockBaseEnabled = state
+		RayfieldNotify({
+			Title = Lock Base,
+			Content = state and Авто Lock включен or Авто Lock выключен,
+			Duration = 4
+		})
+	end
+})
+task.spawn(function()
+	while true do
+		if lockBaseEnabled then
+			local base = FindPlayerBase()
+			local root = player.Character and player.CharacterFindFirstChild(HumanoidRootPart)
+
+			if base and root then
+				local lock = baseFindFirstChild(Lock, true)
+				if lock and lockIsA(BasePart) then
+					local timer = lockFindFirstChild(LockAttachment, true)
+					if timer then
+						timer = timerFindFirstChild(LockGui, true)
+						if timer then
+							timer = timerFindFirstChild(Timer, true)
+							if timer and timerIsA(TextLabel) then
+								if timer.Text == 0s then
+									local originalCFrame = lock.CFrame
+
+									lock.CFrame = root.CFrame
+									lock.CanCollide = false
+									lock.Transparency = 1
+
+									RayfieldNotify({
+										Title = Lock автоактивирован,
+										Content = Lock перенесён к тебе на 3 секунды.,
+										Duration = 3
+									})
+
+									task.wait(0.5)
+
+									lock.CFrame = originalCFrame
+									lock.CanCollide = true
+									lock.Transparency = 0
+
+									RayfieldNotify({
+										Title = Lock восстановлен,
+										Content = Lock вернулся на место.,
+										Duration = 3
+									})
+
+									-- Подождём немного, чтобы не сработало повторно
+									task.wait(1.5)
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+		task.wait(0.2)
+	end
+end)
+
+
+-- === 💸 Instant Steal ===
+mainTabCreateButton({
+	Name = 💸 Instant Steal (CollectZone к тебе),
+	Callback = function()
+		local base = FindPlayerBase()
+		local root = player.Character and player.CharacterFindFirstChild(HumanoidRootPart)
+
+		if base and root then
+			local cz = baseFindFirstChild(CollectZone, true)
+			if cz and czIsA(BasePart) then
+				local original = cz.CFrame
+				cz.CFrame = root.CFrame
+				cz.Transparency = 1
+				cz.CanCollide = false
+				task.wait(0.1)
+				cz.CFrame = original
+				cz.Transparency = 0
+				cz.CanCollide = true
+			end
+		end
+	end
+})
