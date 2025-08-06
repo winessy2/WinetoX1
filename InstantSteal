@@ -1,0 +1,113 @@
+local playerGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+local oldGui = playerGui:FindFirstChild("DraggableStealGUI")
+if oldGui then
+	oldGui:Destroy()
+end
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "DraggableStealGUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = playerGui
+
+
+local Frame = Instance.new("Frame")
+Frame.Name = "MainFrame"
+Frame.Size = UDim2.new(0, 300, 0, 150)
+Frame.Position = UDim2.new(0.5, -150, 0.5, -75)
+Frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+Frame.BorderSizePixel = 0
+Frame.Active = true
+Frame.Draggable = true
+Frame.Parent = ScreenGui
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 12)
+UICorner.Parent = Frame
+
+local Title = Instance.new("TextLabel")
+Title.Name = "Title"
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Position = UDim2.new(0, 0, 0, 0)
+Title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Title.Text = "Instant Steal (by WinetoX)"
+Title.TextColor3 = Color3.new(1, 1, 1)
+Title.TextScaled = true
+Title.Font = Enum.Font.SourceSansBold
+Title.Parent = Frame
+
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = UDim.new(0, 12)
+TitleCorner.Parent = Title
+
+
+local Button = Instance.new("TextButton")
+Button.Size = UDim2.new(0.8, 0, 0, 40)
+Button.Position = UDim2.new(0.1, 0, 0.5, -20)
+Button.BackgroundColor3 = Color3.fromRGB(70, 120, 250)
+Button.TextColor3 = Color3.new(1, 1, 1)
+Button.Text = "💸 Instant Steal"
+Button.Font = Enum.Font.GothamBold
+Button.TextScaled = true
+Button.Parent = Frame
+
+local ButtonCorner = Instance.new("UICorner")
+ButtonCorner.CornerRadius = UDim.new(0, 8)
+ButtonCorner.Parent = Button
+
+local function FindPlayerBase()
+	local player = game.Players.LocalPlayer
+	local basesFolder = workspace:FindFirstChild("Bases")
+	if not basesFolder then return nil end
+
+	for _, base in ipairs(basesFolder:GetChildren()) do
+		local config = base:FindFirstChild("Configuration")
+		if config then
+			local playerValue = config:FindFirstChild("Player")
+			if playerValue and tostring(playerValue.Value) == player.Name then
+				return base
+			end
+		end
+	end
+
+	return nil
+end
+
+Button.MouseButton1Click:Connect(function()
+	local player = game.Players.LocalPlayer
+	local base = FindPlayerBase()
+	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+
+	if base and root then
+		local cz = base:FindFirstChild("CollectZone", true)
+		if cz and cz:IsA("BasePart") then
+			local original = cz.CFrame
+
+			cz.CFrame = root.CFrame
+			cz.Transparency = 1
+			cz.CanCollide = false
+
+			game:GetService("StarterGui"):SetCore("SendNotification", {
+				Title = "Instant Steal",
+				Duration = 3
+			})
+
+			task.delay(0.01, function()
+				cz.CFrame = original
+				cz.Transparency = 0
+				cz.CanCollide = true
+			end)
+		else
+			game:GetService("StarterGui"):SetCore("SendNotification", {
+				Title = "Ошибка",
+				Text = "CollectZone не найден.",
+				Duration = 3
+			})
+		end
+	else
+		game:GetService("StarterGui"):SetCore("SendNotification", {
+			Title = "Ошибка",
+			Text = "База или персонаж не найдены.",
+			Duration = 3
+		})
+	end
+end)
