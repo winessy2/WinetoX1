@@ -135,7 +135,7 @@ if playerBase then
 end
 
 mainTab:CreateToggle({
-	Name = "ESP",
+	Name = "ESP (beta v0.2)",
 	CurrentValue = false,
 	Flag = "ESPToggle",
 	Callback = function(enabled)
