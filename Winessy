@@ -1,6 +1,7 @@
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
 local Window = Rayfield:CreateWindow({
+
    Name = "WinetoX Hub v0.1",
    LoadingTitle = "WinetoX Loader",
    LoadingSubtitle = "Ultimate GUI by WinetoX",
@@ -21,7 +22,12 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
-local mainTab = Window:CreateTab("Combat (скоро добавлю другие вкладки мне ща лень)", nil)
+--  вкладкэ
+local combatTab = Window:CreateTab("Combat", nil)
+local movementTab = Window:CreateTab("Movement", nil)
+local renderTab = Window:CreateTab("Render", nil)
+local miscTab = Window:CreateTab("Misc", nil)
+
 
 local player = game.Players.LocalPlayer
 local UIS = game:GetService("UserInputService")
@@ -44,7 +50,7 @@ player.CharacterAdded:Connect(function(char)
 	end)
 end)
 
-mainTab:CreateButton({
+movementTab:CreateButton({
 	Name = "Speed 72",
 	Callback = function()
 		speed = 72
@@ -73,7 +79,7 @@ RunService.Stepped:Connect(function()
 	end
 end)
 
-mainTab:CreateToggle({
+movementTab:CreateToggle({
 	Name = "Noclip",
 	CurrentValue = false,
 	Flag = "NoclipToggle",
@@ -111,7 +117,7 @@ end
 local playerBase = FindPlayerBase()
 
 if playerBase then
-	mainTab:CreateButton({
+	movementTab:CreateButton({
 		Name = "Телепорт к базе",
 		Callback = function()
 			local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
@@ -134,8 +140,9 @@ if playerBase then
 	})
 end
 
-mainTab:CreateToggle({
-	Name = "ESP (beta v0.2)",
+-- ESP
+renderTab:CreateToggle({
+	Name = "ESP 0.2",
 	CurrentValue = false,
 	Flag = "ESPToggle",
 	Callback = function(enabled)
@@ -218,8 +225,9 @@ mainTab:CreateToggle({
 		end
 	end
 })
+
 -- Флай бай (XNEOFF)
-mainTab:CreateButton({
+movementTab:CreateButton({
 	Name = "Fly Bypass (XNEOFF)",
 	Callback = function()
 		loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
@@ -241,7 +249,7 @@ UIS.JumpRequest:Connect(function()
 	end
 end)
 
-mainTab:CreateToggle({
+movementTab:CreateToggle({
 	Name = "Infinite Jump",
 	CurrentValue = false,
 	Flag = "InfJumpToggle",
@@ -256,7 +264,7 @@ mainTab:CreateToggle({
 })
 
 -- какойта промти байпасс
-mainTab:CreateButton({
+miscTab:CreateButton({
 	Name = "ProximityPrompt = 0",
 	Callback = function()
 		local function bypassPrompt(prompt)
@@ -285,7 +293,7 @@ mainTab:CreateButton({
 -- лок базы (байпасс того баз финдера)
 local lockBaseEnabled = false
 
-mainTab:CreateToggle({
+miscTab:CreateToggle({
 	Name = "Авто Lock Base",
 	CurrentValue = false,
 	Flag = "LockBaseToggle",
@@ -352,39 +360,14 @@ task.spawn(function()
 end)
 
 -- моя топ разработка разраб хуй пофиксит у меня еще 3+ обходов + ач у вас хуйня
-mainTab:CreateButton({
-	Name = "Instant Steal",
+combatTab:CreateButton({
+	Name = "InstantSteal Bypass (WinetoX)",
 	Callback = function()
-		local base = FindPlayerBase()
-		local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-
-		if base and root then
-			local cz = base:FindFirstChild("CollectZone", true)
-			if cz and cz:IsA("BasePart") then
-				local original = cz.CFrame
-
-				cz.CFrame = root.CFrame
-				cz.Transparency = 1
-				cz.CanCollide = false
-
-				Rayfield:Notify({
-					Title = "Instant Steal",
-					Content = "ты забрал робло (если он бы у тебя в руках)",
-					Duration = 3
-				})
-
-				task.delay(0.1, function()
-					cz.CFrame = original
-					cz.Transparency = 0
-					cz.CanCollide = true
-				end)
-			else
-				Rayfield:Notify({
-					Title = "Ошибка",
-					Content = "CollectZone не найден.",
-					Duration = 3
-				})
-			end
-		end
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/winessy2/WinetoX1/refs/heads/main/InstantSteal"))()
+		Rayfield:Notify({
+			Title = "актевэрован стил",
+			Content = "Steal байпасс WinetoX загружен!",
+			Duration = 5
+		})
 	end
 })
