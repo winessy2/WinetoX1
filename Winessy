@@ -134,45 +134,90 @@ if playerBase then
 	})
 end
 
--- ESP
 mainTab:CreateToggle({
-	Name = "ESP v0.1",
+	Name = "ESP",
 	CurrentValue = false,
 	Flag = "ESPToggle",
 	Callback = function(enabled)
-		for _, p in pairs(game.Players:GetPlayers()) do
-			if p ~= player and p.Character then
-				local head = p.Character:FindFirstChild("Head")
-				if head and not head:FindFirstChild("NameTag") then
-					local tag = Instance.new("BillboardGui", head)
-					tag.Name = "NameTag"
-					tag.Size = UDim2.new(0, 200, 0, 50)
-					tag.StudsOffset = Vector3.new(0, 2, 0)
-					tag.AlwaysOnTop = true
+		local function applyESP(targetPlayer)
+			if targetPlayer == player then return end
+			if not targetPlayer.Character then return end
 
-					local label = Instance.new("TextLabel", tag)
-					label.Size = UDim2.new(1, 0, 1, 0)
-					label.BackgroundTransparency = 1
-					label.TextColor3 = Color3.new(1, 1, 1)
-					label.TextStrokeTransparency = 0
-					label.Text = p.Name
-					label.Font = Enum.Font.SourceSansBold
-					label.TextScaled = true
-				end
+			local char = targetPlayer.Character
+
+			-- Highlight
+			if not char:FindFirstChild("WinetoX_Highlight") then
+				local highlight = Instance.new("Highlight")
+				highlight.Name = "WinetoX_Highlight"
+				highlight.FillColor = Color3.fromRGB(255, 100, 100)
+				highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+				highlight.FillTransparency = 0.5
+				highlight.OutlineTransparency = 0
+				highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+				highlight.Adornee = char
+				highlight.Parent = char
+			end
+
+			-- NameTag
+			local head = char:FindFirstChild("Head")
+			if head and not head:FindFirstChild("NameTag") then
+				local tag = Instance.new("BillboardGui", head)
+				tag.Name = "NameTag"
+				tag.Size = UDim2.new(0, 200, 0, 50)
+				tag.StudsOffset = Vector3.new(0, 2, 0)
+				tag.AlwaysOnTop = true
+
+				local label = Instance.new("TextLabel", tag)
+				label.Size = UDim2.new(1, 0, 1, 0)
+				label.BackgroundTransparency = 1
+				label.TextColor3 = Color3.new(1, 1, 1)
+				label.TextStrokeTransparency = 0
+				label.Text = targetPlayer.Name
+				label.Font = Enum.Font.SourceSansBold
+				label.TextScaled = true
 			end
 		end
 
-		if not enabled then
-			for _, p in pairs(game.Players:GetPlayers()) do
-				if p ~= player and p.Character and p.Character:FindFirstChild("Head") then
-					local tag = p.Character.Head:FindFirstChild("NameTag")
+		local function removeESP(targetPlayer)
+			if targetPlayer.Character then
+				local char = targetPlayer.Character
+
+				local highlight = char:FindFirstChild("WinetoX_Highlight")
+				if highlight then highlight:Destroy() end
+
+				local head = char:FindFirstChild("Head")
+				if head then
+					local tag = head:FindFirstChild("NameTag")
 					if tag then tag:Destroy() end
 				end
 			end
 		end
+
+		if enabled then
+			for _, p in pairs(game.Players:GetPlayers()) do
+				applyESP(p)
+			end
+
+			game.Players.PlayerAdded:Connect(function(p)
+				p.CharacterAdded:Connect(function()
+					if lockBaseEnabled then wait(1) end
+					applyESP(p)
+				end)
+			end)
+
+			for _, p in pairs(game.Players:GetPlayers()) do
+				p.CharacterAdded:Connect(function()
+					if lockBaseEnabled then wait(1) end
+					applyESP(p)
+				end)
+			end
+		else
+			for _, p in pairs(game.Players:GetPlayers()) do
+				removeESP(p)
+			end
+		end
 	end
 })
-
 -- Флай бай (XNEOFF)
 mainTab:CreateButton({
 	Name = "Fly Bypass (XNEOFF)",
