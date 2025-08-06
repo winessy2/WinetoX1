@@ -2,7 +2,7 @@ local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
 local Window = Rayfield:CreateWindow({
 
-   Name = "WinetoX Hub v0.1",
+   Name = "WinetoX Hub v0.2",
    LoadingTitle = "WinetoX Loader",
    LoadingSubtitle = "Ultimate GUI by WinetoX",
    ConfigurationSaving = {
