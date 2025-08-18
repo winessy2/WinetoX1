@@ -1,0 +1,367 @@
+
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "WarneX v0.1",
+    LoadingTitle = "Version v0.1",
+    LoadingSubtitle = "by WinetoX",
+    ConfigurationSaving = { Enabled = false }
+})
+
+local Tab = Window:CreateTab("Main", 4483362458)
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+
+local Player = Players.LocalPlayer
+
+local normalSpeed = 24
+local hackSpeed = 102
+local smallSpeed = 12 -- макс скорость античита так что не дергайте себя под этот скрипт
+local speedBypass = false
+local noclipEnabled = false
+local infJumpEnabled = false
+local promptBypass = false
+local promptConnection
+
+local Humanoid
+local Character
+
+local function setupCharacter(char)
+    Character = char
+    Humanoid = Character:WaitForChild("Humanoid")
+    if speedBypass then
+        task.spawn(speedLoop)
+    else
+        Humanoid.WalkSpeed = normalSpeed
+    end
+end
+
+Player.CharacterAdded:Connect(setupCharacter)
+if Player.Character then
+    setupCharacter(Player.Character)
+end
+
+-- Спид хад пофиксэтэ я плаки плаки буду
+function speedLoop()
+    while speedBypass and Character and Humanoid do
+        local root = Character:FindFirstChild("HumanoidRootPart")
+        if root then
+            local moveDir = Humanoid.MoveDirection
+            if moveDir.Magnitude > 0 then
+                local delta = moveDir.Unit * hackSpeed * 0.02
+                root.CFrame = root.CFrame + delta
+            end
+        end
+        Humanoid.WalkSpeed = smallSpeed
+        task.wait(0.005)
+    end
+    if Humanoid then Humanoid.WalkSpeed = normalSpeed end
+end
+
+-- кнопка о спидах
+Tab:CreateToggle({
+    Name = "🏃🏃 Speed 🏃 🏃",
+    CurrentValue = false,
+    Flag = "Speed",
+    Callback = function(value)
+        speedBypass = value
+        if Humanoid and Character then
+            if speedBypass then
+                task.spawn(speedLoop)
+            else
+                Humanoid.WalkSpeed = normalSpeed
+            end
+        end
+    end
+})
+
+-- ноу клайп
+RunService.Stepped:Connect(function()
+    if noclipEnabled and Character then
+        for _, part in pairs(Character:GetDescendants()) do
+            if part:IsA("BasePart") and part.CanCollide then
+                part.CanCollide = false
+            end
+        end
+    end
+end)
+
+Tab:CreateToggle({
+    Name = "🚧NoClip🚧",
+    CurrentValue = false,
+    Flag = "NoClip",
+    Callback = function(value)
+        noclipEnabled = value
+    end
+})
+
+-- инф джамп крч
+UserInputService.JumpRequest:Connect(function()
+    if infJumpEnabled and Humanoid then
+        Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+end)
+
+Tab:CreateToggle({
+    Name = "🔹Infinite Jump🔹",
+    CurrentValue = false,
+    Flag = "InfJump",
+    Callback = function(value)
+        infJumpEnabled = value
+    end
+})
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local Player = Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+
+Player.CharacterAdded:Connect(function(char)
+    Character = char
+end)
+
+local npcFollowEnabled = false
+local npcOriginalCFrame = nil
+local npcFollowConnection
+local npcPart -- сам NPCZone
+
+-- базе финдер
+local function findPlayerPlot()
+    local plotsFolder = workspace:FindFirstChild("Plots")
+    if not plotsFolder then
+        warn("Папки plot и тд нэ нашлось поэтому итдите и перезаходите")
+        return nil
+    end
+
+    for i = 1, 6 do
+        local plot = plotsFolder:FindFirstChild("Plot" .. i)
+        if plot and plot:FindFirstChild("Owner") and plot.Owner:IsA("StringValue") then
+            if plot.Owner.Value == Player.Name then
+                return plot
+            end
+        end
+    end
+
+    warn("нету вашего ника в плотах перезаходите либо я хз (если перезахд не помог в тг сообщениях пишите) " .. Player.Name)
+    return nil
+end
+
+
+local function startNpcFollow()
+    local plot = findPlayerPlot()
+    if not plot then 
+        return 
+    end
+
+    npcPart = plot:FindFirstChild("NPCZone")
+    if not npcPart or not npcPart:IsA("BasePart") then 
+        return 
+    end
+
+    npcOriginalCFrame = npcPart.CFrame
+
+    task.wait(0.5)
+
+    if npcFollowConnection then
+        npcFollowConnection:Disconnect()
+        npcFollowConnection = nil
+    end
+
+
+    npcFollowConnection = RunService.Heartbeat:Connect(function()
+        if npcFollowEnabled and Character and Character:FindFirstChild("HumanoidRootPart") and npcPart then
+            npcPart.CFrame = Character.HumanoidRootPart.CFrame
+        end
+    end)
+
+end
+
+
+local function stopNpcFollow()
+    if npcFollowConnection then
+        npcFollowConnection:Disconnect()
+        npcFollowConnection = nil
+    end
+
+    if npcPart and npcOriginalCFrame then
+        npcPart.CFrame = npcOriginalCFrame
+    end
+end
+
+
+Tab:CreateToggle({
+    Name = "💵Auto Steal💵",
+    CurrentValue = false,
+    Flag = "Auto Steal",
+    Callback = function(value)
+        npcFollowEnabled = value
+        if npcFollowEnabled then
+            startNpcFollow()
+        else
+            stopNpcFollow()
+        end
+    end
+})
+-- Anti- Ragdoll не работает пока что (иди нахцй че тебе в моём коде надо)
+local antiRagdollEnabled = false
+local humanoidConn = nil
+
+local function enableAntiRagdoll(char)
+    local humanoid = char:WaitForChild("Humanoid", 5)
+    if not humanoid then return end
+
+
+    for _, obj in ipairs(char:GetDescendants()) do
+        if obj:IsA("BallSocketConstraint") or obj.Name == "RagdollWeld" then
+            obj:Destroy()
+        elseif obj:IsA("Motor6D") then
+            obj.Enabled = true
+        end
+    end
+
+    char.DescendantAdded:Connect(function(obj)
+        if antiRagdollEnabled then
+            if obj:IsA("BallSocketConstraint") or obj.Name == "RagdollWeld" then
+                obj:Destroy()
+            elseif obj:IsA("Motor6D") then
+                obj.Enabled = true
+            end
+        end
+    end)
+
+    humanoidConn = humanoid.StateChanged:Connect(function(_, newState)
+        if antiRagdollEnabled and newState == Enum.HumanoidStateType.Physics then
+            humanoid:ChangeState(Enum.HumanoidStateType.Running)
+        end
+    end)
+end
+
+local function disableAntiRagdoll()
+    if humanoidConn then
+        humanoidConn:Disconnect()
+        humanoidConn = nil
+    end
+end
+
+
+Tab:CreateToggle({
+    Name = "Anti-Ragdoll(no work)",
+    CurrentValue = false,
+    Flag = "AntiRagdoll",
+    Callback = function(value)
+        antiRagdollEnabled = value
+        if value then
+            if Player.Character then enableAntiRagdoll(Player.Character) end
+            Player.CharacterAdded:Connect(enableAntiRagdoll)
+        else
+            disableAntiRagdoll()
+        end
+    end
+})
+-- lock baze ну авто лок базы
+local lockBaseEnabled = false
+local lockBaseThread
+
+local function getPlayerPlot()
+    local Plots = workspace:WaitForChild("Plots")
+    for i = 1, 6 do
+        local plot = Plots:FindFirstChild("Plot" .. i)
+        if plot and plot:FindFirstChild("Owner") then
+            local ownerVal = plot.Owner
+            if ownerVal:IsA("StringValue") and ownerVal.Value == Player.Name then
+                return plot
+            end
+        end
+    end
+    return nil
+end
+
+local function lockBaseLoop()
+    while lockBaseEnabled do
+        local plot = getPlayerPlot()
+        if plot then
+            local baseLock = plot:FindFirstChild("BaseLock")
+            if baseLock and baseLock:FindFirstChild("TouchPart") then
+                local touchPart = baseLock.TouchPart
+				touchPart.CanCollide = true
+                local billboard = touchPart:FindFirstChild("BillboardGui")
+                if billboard then
+                    local timeLabel = billboard:FindFirstChild("TimeLabel")
+                    if timeLabel and timeLabel:IsA("TextLabel") then
+                        if timeLabel.Text == "Lock Base" then
+                            local oldCFrame = touchPart.CFrame
+                            local root = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
+                            if root then
+                                touchPart.CFrame = root.CFrame
+                                task.wait(0.3)
+                                touchPart.CFrame = oldCFrame
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        task.wait(0.1)
+    end
+end
+
+Tab:CreateToggle({
+    Name = "🔒Auto Lock🔒",
+    CurrentValue = false,
+    Flag = "LockBase",
+    Callback = function(value)
+        lockBaseEnabled = value
+        if value then
+            lockBaseThread = task.spawn(lockBaseLoop)
+        else
+            if lockBaseThread then
+                task.cancel(lockBaseThread)
+                lockBaseThread = nil
+            end
+        end
+    end
+})
+-- убирает забержку 
+local function setPromptInstant(prompt)
+    if prompt:IsA("ProximityPrompt") then
+        prompt.HoldDuration = 0
+    end
+end
+
+local function enablePromptBypass()
+    for _, obj in pairs(workspace:GetDescendants()) do
+        setPromptInstant(obj)
+    end
+    promptConnection = workspace.DescendantAdded:Connect(function(obj)
+        setPromptInstant(obj)
+    end)
+end
+
+local function disablePromptBypass()
+    if promptConnection then
+        promptConnection:Disconnect()
+        promptConnection = nil
+    end
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("ProximityPrompt") then
+            obj.HoldDuration = 2 
+        end
+    end
+end
+
+Tab:CreateToggle({
+    Name = "Instant ProximityPrompt",
+    CurrentValue = false,
+    Flag = "PromptBypass",
+    Callback = function(value)
+        promptBypass = value
+        if promptBypass then
+            enablePromptBypass()
+        else
+            disablePromptBypass()
+        end
+    end
+})
