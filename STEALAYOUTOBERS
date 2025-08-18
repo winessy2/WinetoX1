@@ -63,7 +63,7 @@ end
 
 -- кнопка о спидах
 Tab:CreateToggle({
-    Name = "🏃🏃 Speed 🏃 🏃",
+    Name = "🏃   Speed   🏃",
     CurrentValue = false,
     Flag = "Speed",
     Callback = function(value)
@@ -90,7 +90,7 @@ RunService.Stepped:Connect(function()
 end)
 
 Tab:CreateToggle({
-    Name = "🚧NoClip🚧",
+    Name = "🚧 NoClip 🚧",
     CurrentValue = false,
     Flag = "NoClip",
     Callback = function(value)
@@ -106,7 +106,7 @@ UserInputService.JumpRequest:Connect(function()
 end)
 
 Tab:CreateToggle({
-    Name = "🔹Infinite Jump🔹",
+    Name = "🔹 Infinite Jump 🔹",
     CurrentValue = false,
     Flag = "InfJump",
     Callback = function(value)
@@ -193,7 +193,7 @@ end
 
 
 Tab:CreateToggle({
-    Name = "💵Auto Steal💵",
+    Name = "💵 Auto Steal 💵",
     CurrentValue = false,
     Flag = "Auto Steal",
     Callback = function(value)
@@ -309,7 +309,7 @@ local function lockBaseLoop()
 end
 
 Tab:CreateToggle({
-    Name = "🔒Auto Lock🔒",
+    Name = "🔒 Auto Lock 🔒",
     CurrentValue = false,
     Flag = "LockBase",
     Callback = function(value)
