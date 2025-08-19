@@ -2,13 +2,16 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-    Name = "WarneX v0.1",
-    LoadingTitle = "Version v0.1",
+    Name = "WarneX v0.2",
+    LoadingTitle = "Version v0.2",
     LoadingSubtitle = "by WinetoX",
     ConfigurationSaving = { Enabled = false }
 })
 
+local TabMovement = Window:CreateTab("Movement", 4483362458)
+local TabCombat = Window:CreateTab("Combat", 4483362458)
 local Tab = Window:CreateTab("Main", 4483362458)
+local TabVisuals = Window:CreateTab("Visuals", 4483362458)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -44,7 +47,7 @@ if Player.Character then
     setupCharacter(Player.Character)
 end
 
--- Спид хад пофиксэтэ я плаки плаки буду
+-- Спид хад да ещо ето и ноу клайп пофиксэтэ я плаки плаки буду
 function speedLoop()
     while speedBypass and Character and Humanoid do
         local root = Character:FindFirstChild("HumanoidRootPart")
@@ -62,8 +65,8 @@ function speedLoop()
 end
 
 -- кнопка о спидах
-Tab:CreateToggle({
-    Name = "🏃   Speed   🏃",
+TabMovement:CreateToggle({
+    Name = "🏃   Speed (Bypass Noclipe)   🏃",
     CurrentValue = false,
     Flag = "Speed",
     Callback = function(value)
@@ -77,7 +80,6 @@ Tab:CreateToggle({
         end
     end
 })
-
 -- ноу клайп
 RunService.Stepped:Connect(function()
     if noclipEnabled and Character then
@@ -89,7 +91,7 @@ RunService.Stepped:Connect(function()
     end
 end)
 
-Tab:CreateToggle({
+TabMovement:CreateToggle({
     Name = "🚧 NoClip 🚧",
     CurrentValue = false,
     Flag = "NoClip",
@@ -105,7 +107,7 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
-Tab:CreateToggle({
+TabMovement:CreateToggle({
     Name = "🔹 Infinite Jump 🔹",
     CurrentValue = false,
     Flag = "InfJump",
@@ -192,7 +194,7 @@ local function stopNpcFollow()
 end
 
 
-Tab:CreateToggle({
+TabCombat:CreateToggle({
     Name = "💵 Auto Steal 💵",
     CurrentValue = false,
     Flag = "Auto Steal",
@@ -247,7 +249,7 @@ local function disableAntiRagdoll()
 end
 
 
-Tab:CreateToggle({
+TabCombat:CreateToggle({
     Name = "Anti-Ragdoll(no work)",
     CurrentValue = false,
     Flag = "AntiRagdoll",
@@ -308,7 +310,7 @@ local function lockBaseLoop()
     end
 end
 
-Tab:CreateToggle({
+TabMovement:CreateToggle({
     Name = "🔒 Auto Lock 🔒",
     CurrentValue = false,
     Flag = "LockBase",
@@ -365,3 +367,194 @@ Tab:CreateToggle({
         end
     end
 })
+-- нетрализация чего то там
+local TARGET_POSITION = Vector3.new(100, 10, 100)
+local SPAM_DURATION = 0.7
+local TICK_RATE = 0.02
+
+local function SpamTeleportToTarget(hrp)
+    local steps = math.floor(SPAM_DURATION / TICK_RATE)
+    for i = 1, steps do
+        hrp.CFrame = CFrame.new(TARGET_POSITION)
+        task.wait(TICK_RATE)
+    end
+end
+
+local function WallTPOnce()
+    local character = Player.Character
+    if not character then return end
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    local humanoid = character:FindFirstChild("Humanoid")
+    if not hrp or not humanoid then return end
+
+    local moveDir = humanoid.MoveDirection
+    if moveDir.Magnitude > 0 then
+        local rayParams = RaycastParams.new()
+        rayParams.FilterDescendantsInstances = {character}
+        rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+
+        local rayResult = workspace:Raycast(hrp.Position, moveDir.Unit * 4, rayParams)
+        if rayResult then
+            task.spawn(function()
+                SpamTeleportToTarget(hrp)
+            end)
+        end
+    end
+end
+
+-- байпасик ноу клайпа :3
+TabMovement:CreateButton({
+    Name = "Bypass Noclipe",
+    Callback = function()
+        local connection = RunService.RenderStepped:Connect(WallTPOnce)
+        task.delay(0.5, function()
+            local character = Player.Character
+            if character then
+                local humanoid = character:FindFirstChild("Humanoid")
+                if humanoid then
+                    humanoid.Health = 0
+                end
+            end
+
+            if connection then
+                connection:Disconnect()
+            end
+
+            Rayfield:Notify({
+                Title = "Bypass Noclipe",
+                Content = "Система античит-защиты была успешно нейтрализована можете дальше бегал с No-clip",
+                Duration = 5,
+                Image = 4483362458
+            })
+        end)
+    end
+})
+-- ESP
+do
+    local Players = game:GetService("Players")
+    local LocalPlayer = Players.LocalPlayer
+
+    local ESP_ON = false
+    local Conns = {PlayerAdded=nil, PlayerRemoving=nil, ByPlayer={}}
+
+    local function getAdornee(char)
+        return char:FindFirstChild("Head")
+            or char:FindFirstChild("UpperTorso")
+            or char:FindFirstChild("Torso")
+            or char:FindFirstChild("HumanoidRootPart")
+    end
+
+    local function applyESP(plr, char)
+        if not ESP_ON or not plr or not char then return end
+        local adornee = getAdornee(char)
+        if not adornee then return end
+
+        -- Highlight (белая обводка)
+        if not char:FindFirstChild("ESP_Highlight") then
+            local h = Instance.new("Highlight")
+            h.Name = "ESP_Highlight"
+            h.FillTransparency = 1
+            h.OutlineTransparency = 0
+            h.OutlineColor = Color3.fromRGB(255,255,255)
+            h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            h.Adornee = char
+            h.Parent = char
+        end
+
+        -- Ник сверху
+        local gui = char:FindFirstChild("ESP_Name")
+        if not gui then
+            gui = Instance.new("BillboardGui")
+            gui.Name = "ESP_Name"
+            gui.AlwaysOnTop = true
+            gui.Size = UDim2.fromOffset(200, 50)
+            gui.StudsOffset = Vector3.new(0, 2.6, 0)
+            gui.Adornee = adornee
+            gui.Parent = char
+
+            local lbl = Instance.new("TextLabel")
+            lbl.Name = "Text"
+            lbl.BackgroundTransparency = 1
+            lbl.Size = UDim2.fromScale(1, 1)
+            lbl.Font = Enum.Font.SourceSansBold
+            lbl.TextScaled = true
+            lbl.TextColor3 = Color3.fromRGB(255,255,255)
+            lbl.TextStrokeTransparency = 0
+            lbl.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+            lbl.Text = plr.DisplayName and (plr.DisplayName.." (@"..plr.Name..")") or plr.Name
+            lbl.Parent = gui
+        else
+            gui.Adornee = adornee
+            local lbl = gui:FindFirstChildOfClass("TextLabel")
+            if lbl then
+                lbl.Text = plr.DisplayName and (plr.DisplayName.." (@"..plr.Name..")") or plr.Name
+            end
+        end
+    end
+
+    local function onCharAdded(plr, char)
+        if not char then return end
+        task.defer(function()
+            char:WaitForChild("Humanoid", 5)
+            applyESP(plr, char)
+        end)
+    end
+
+    local function startESP()
+        ESP_ON = true
+
+
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer then
+                Conns.ByPlayer[plr] = Conns.ByPlayer[plr] or {}
+                table.insert(Conns.ByPlayer[plr], plr.CharacterAdded:Connect(function(ch)
+                    onCharAdded(plr, ch)
+                end))
+                if plr.Character then onCharAdded(plr, plr.Character) end
+            end
+        end
+
+
+        Conns.PlayerAdded = Players.PlayerAdded:Connect(function(plr)
+            if plr == LocalPlayer then return end
+            Conns.ByPlayer[plr] = Conns.ByPlayer[plr] or {}
+            table.insert(Conns.ByPlayer[plr], plr.CharacterAdded:Connect(function(ch)
+                onCharAdded(plr, ch)
+            end))
+            if plr.Character then onCharAdded(plr, plr.Character) end
+        end)
+
+
+        Conns.PlayerRemoving = Players.PlayerRemoving:Connect(function(plr)
+            local list = Conns.ByPlayer[plr]
+            if list then for _,c in ipairs(list) do c:Disconnect() end end
+            Conns.ByPlayer[plr] = nil
+        end)
+    end
+
+    local function stopESP()
+        ESP_ON = false
+        if Conns.PlayerAdded then Conns.PlayerAdded:Disconnect(); Conns.PlayerAdded=nil end
+        if Conns.PlayerRemoving then Conns.PlayerRemoving:Disconnect(); Conns.PlayerRemoving=nil end
+        for plr, list in pairs(Conns.ByPlayer) do
+            for _,c in ipairs(list) do c:Disconnect() end
+            Conns.ByPlayer[plr] = nil
+        end
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer and plr.Character then
+                local ch = plr.Character
+                local h = ch:FindFirstChild("ESP_Highlight"); if h then h:Destroy() end
+                local b = ch:FindFirstChild("ESP_Name");     if b then b:Destroy() end
+            end
+        end
+    end
+
+    TabVisuals:CreateToggle({
+        Name = "👀 ESP 👀",
+        CurrentValue = false,
+        Flag = "ESPPlayers",
+        Callback = function(v)
+            if v then startESP() else stopESP() end
+        end
+    })
+end
