@@ -2,8 +2,8 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-    Name = "WarneX v0.3",
-    LoadingTitle = "Version v0.3",
+    Name = "WarneX v0.2",
+    LoadingTitle = "Version v0.2",
     LoadingSubtitle = "by WinetoX",
     ConfigurationSaving = { Enabled = false }
 })
@@ -45,6 +45,74 @@ local function setupCharacter(char)
         Humanoid.WalkSpeed = normalSpeed
     end
 end
+
+local function SendMessage(title, content, duration)
+    Rayfield:Notify({
+        Title = title or "Заходите в ТГК @StealaYT здесь будут новости о скрипте ",
+        Content = content or "ТГК @StealaYT",
+        Duration = duration or 6,
+        Image = 4483362458, 
+    })
+end
+
+
+TabMain:CreateButton({
+    Name = "ТГК @StealaYT",
+    Callback = function()
+        SendMessage("Реклама", "Заходите в ТГК @StealaYT здесь будут новости о скрипте", 8)
+    end,
+})
+
+local function SendMessage(title, content, duration)
+    Rayfield:Notify({
+        Title = title or "Заходите в ТГК @StealaYT здесь будут новости о скрипте ",
+        Content = content or "ТГК @StealaYT",
+        Duration = duration or 6,
+        Image = 4483362458, 
+    })
+end
+
+
+TabMovement:CreateButton({
+    Name = "ТГК @StealaYT",
+    Callback = function()
+        SendMessage("Реклама", "Заходите в ТГК @StealaYT здесь будут новости о скрипте", 8)
+    end,
+})
+
+local function SendMessage(title, content, duration)
+    Rayfield:Notify({
+        Title = title or "Заходите в ТГК @StealaYT здесь будут новости о скрипте ",
+        Content = content or "ТГК @StealaYT",
+        Duration = duration or 6,
+        Image = 4483362458, 
+    })
+end
+
+
+TabCombat:CreateButton({
+    Name = "ТГК @StealaYT",
+    Callback = function()
+        SendMessage("Реклама", "Заходите в ТГК @StealaYT здесь будут новости о скрипте", 8)
+    end,
+})
+
+local function SendMessage(title, content, duration)
+    Rayfield:Notify({
+        Title = title or "Заходите в ТГК @StealaYT здесь будут новости о скрипте ",
+        Content = content or "ТГК @StealaYT",
+        Duration = duration or 6,
+        Image = 4483362458, 
+    })
+end
+
+
+TabVisuals:CreateButton({
+    Name = "ТГК @StealaYT",
+    Callback = function()
+        SendMessage("Реклама", "Заходите в ТГК @StealaYT здесь будут новости о скрипте", 8)
+    end,
+})
 
 Player.CharacterAdded:Connect(setupCharacter)
 if Player.Character then
