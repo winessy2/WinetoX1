@@ -271,7 +271,7 @@ local function findPlayerPlot()
 end
 
 TabCombat:CreateToggle({
-    Name = "💰 Auto Steal NPCZone 💰",
+    Name = "💰 Auto Steal 💰",
     CurrentValue = false,
     Flag = "AutoStealNPCHold",
     Callback = function(Value)
