@@ -653,7 +653,7 @@ end
 
 
 TabVisuals:CreateToggle({
-   Name = "Видимые Таймеры",
+   Name = "👀ESP TIMER👀",
    CurrentValue = false,
    Flag = "TimersToggle",
    Callback = function(state)
