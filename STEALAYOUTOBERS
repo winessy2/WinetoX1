@@ -2,8 +2,8 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-    Name = "WarneX v0.2",
-    LoadingTitle = "Version v0.2",
+    Name = "WarneX v0.3",
+    LoadingTitle = "Version v0.3",
     LoadingSubtitle = "by WinetoX",
     ConfigurationSaving = { Enabled = false }
 })
